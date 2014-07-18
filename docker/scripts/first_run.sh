@@ -5,6 +5,7 @@ pre_start_action() {
   # Mostrar informacion sobre el usuario y la contraseña`
   echo -e "MARIADB_USER=$USER"
   echo -e "MARIADB_PASS=$PASS"
+  PASS_ECHO = PASS
 }
 
 post_start_action() {
@@ -52,12 +53,12 @@ set_root_ssh_password() {
   echo -e ""
   echo -e "Si lo desean pueden cambiar el password desde adentro, es recomendable!"
   echo -e "=========================================================================== \n"
-  
+
   echo -e "===============================MariaDB====================================="
   echo -e "Usuario de maria DB:"
   echo -e ""
   echo -e "    MARIADB_USER=$USER"
-  echo -e "    MARIADB_PASS=$PASS"
+  echo -e "    MARIADB_PASS=$PASS_ECHO"
   echo -e ""
   echo -e "============================================================================"
   echo -e "\n\n Leonel Franchelli 0.1"

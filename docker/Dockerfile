@@ -43,14 +43,6 @@ RUN apt-get install -y inotify-tools
 #ssh
 RUN apt-get install -y openssh-server
 
-#Configuramos ssh
-RUN sed -i \
-        -e 's/^#*\(PermitRootLogin\) .*/\1 yes/' \
-        -e 's/^#*\(PasswordAuthentication\) .*/\1 yes/' \
-        -e 's/^#*\(PermitEmptyPasswords\) .*/\1 yes/' \
-        -e 's/^#*\(UsePAM\) .*/\1 no/' \
-        /etc/ssh/sshd_config
-
 # Limpiamos la basura
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
