@@ -30,16 +30,18 @@ RUN apt-get install -y \
     daemontools git curl nginx\
     php5-cli php5-json php5-fpm php5-intl php5-mcrypt php5-mysql mariadb-server mariadb-client
 
-#Phpmyadmin
-
-RUN apt-get install -y phpmyadmin
-
-# Clean up APT when done.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 #Instalamos composer =D
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
+
+#Phpmyadmin
+
+RUN apt-get install -y phpmyadmin
+RUN apt-get install -y pwgen
+RUN apt-get install -y inotify-tools
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 
 RUN echo "daemonize=no" > /etc/php5/fpm/pool.d/daemonize.conf
 RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
@@ -55,7 +57,6 @@ ADD services/ /srv/services
 ADD scripts /scripts
 
 #Configurar MariaDB
-RUN chmod +x /scripts/start.sh
 #Se crea para saber cuando corre por primera vez
 RUN touch /firstrun
 

@@ -5,13 +5,14 @@ pre_start_action() {
   # Echo out info to later obtain by running `docker logs container_name`
   echo "MARIADB_USER=$USER"
   echo "MARIADB_PASS=$PASS"
-
-  # Ensure mysql owns the DATA_DIR
-  chown -R mysql $DATA_DIR
-  chown root $DATA_DIR/debian*.flag
 }
 
 post_start_action() {
+  DB_MAINT_PASS=$(cat /etc/mysql/debian.cnf | grep -m 1 "password\s*=\s*"| sed 's/^password\s*=\s*//')
+  mysql -u root -e \
+      "GRANT ALL PRIVILEGES ON *.* TO 'debian-sys-maint'@'localhost' IDENTIFIED BY '$DB_MAINT_PASS';"
+
+  
   # Create the superuser.
   mysql -u root <<-EOF
       DELETE FROM mysql.user WHERE user = '$USER';
@@ -22,5 +23,6 @@ post_start_action() {
       GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%' WITH GRANT OPTION;
 EOF
 
+  echo "Usuario $USER creado correctamente, DB inicializada correctamente"
   rm /firstrun
 }
