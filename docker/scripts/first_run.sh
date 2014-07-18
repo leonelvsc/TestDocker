@@ -5,7 +5,7 @@ pre_start_action() {
   # Mostrar informacion sobre el usuario y la contraseña`
   echo -e "MARIADB_USER=$USER"
   echo -e "MARIADB_PASS=$PASS"
-  PASS_ECHO = PASS
+  PASS_ECHO=$PASS
 }
 
 post_start_action() {
