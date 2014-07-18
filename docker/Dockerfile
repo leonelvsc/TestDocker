@@ -39,7 +39,19 @@ RUN mv composer.phar /usr/local/bin/composer
 RUN apt-get install -y phpmyadmin
 RUN apt-get install -y pwgen
 RUN apt-get install -y inotify-tools
-# Clean up APT when done.
+
+#ssh
+RUN apt-get install -y openssh-server
+
+#Configuramos ssh
+RUN sed -i \
+        -e 's/^#*\(PermitRootLogin\) .*/\1 yes/' \
+        -e 's/^#*\(PasswordAuthentication\) .*/\1 yes/' \
+        -e 's/^#*\(PermitEmptyPasswords\) .*/\1 yes/' \
+        -e 's/^#*\(UsePAM\) .*/\1 no/' \
+        /etc/ssh/sshd_config
+
+# Limpiamos la basura
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 
@@ -47,13 +59,12 @@ RUN echo "daemonize=no" > /etc/php5/fpm/pool.d/daemonize.conf
 RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
 
 #Configuraciones
-ADD vhost.conf /etc/nginx/sites-enabled/default
-ADD php.ini /etc/php5/fpm/php.ini
-ADD php.ini /etc/php5/cli/php.ini
-ADD my.cnf /etc/mysql/my.cnf
+ADD config/vhost.conf /etc/nginx/sites-enabled/default
+ADD config/php.ini /etc/php5/fpm/php.ini
+ADD config/php.ini /etc/php5/cli/php.ini
+ADD config/my.cnf /etc/mysql/my.cnf
 
 #Agrega carpetas de configuraciones
-ADD services/ /srv/services
 ADD scripts /scripts
 
 #Configurar MariaDB
@@ -62,10 +73,11 @@ RUN touch /firstrun
 
 VOLUME ["/var/log/nginx/"]
 
-ADD entrypoint.sh /usr/local/bin/entrypoint.sh
+ADD config/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 #Exponemos el puerto 80 para la web
 EXPOSE 80
+EXPOSE 22
 
 #script que se ejecuta cada vez que se crea la vm
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
