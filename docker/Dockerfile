@@ -1,6 +1,6 @@
 #Symfony2 development environment
-
 FROM debian:7.5
+
 MAINTAINER Leonel Franchelli <leonel.f@outlook.com>
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -27,34 +27,44 @@ RUN add-apt-repository 'deb http://mirrors.fe.up.pt/pub/mariadb/repo/10.0/debian
 RUN apt-get update
 
 RUN apt-get install -y \
-    daemontools curl apache2 \
-    php5-cli php5-json php5-fpm php5-intl php5-mysql mariadb-server mariadb-client phpmyadmin
+    daemontools git curl nginx\
+    php5-cli php5-json php5-fpm php5-intl php5-mcrypt php5-mysql mariadb-server mariadb-client
 
+#Phpmyadmin
+
+RUN apt-get install -y phpmyadmin
+
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+#Instalamos composer =D
 RUN curl -sS https://getcomposer.org/installer | php
 RUN mv composer.phar /usr/local/bin/composer
 
 RUN echo "daemonize=no" > /etc/php5/fpm/pool.d/daemonize.conf
-#RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
+RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
 
-# Set environment variables
-ENV APACHE_RUN_USER root
-ENV APACHE_RUN_GROUP root
-ENV APACHE_PID_FILE /var/run/apache2.pid
-ENV APACHE_RUN_DIR /var/run/apache2
-ENV APACHE_LOCK_DIR /var/lock/apache2
-ENV APACHE_LOG_DIR /var/log/apache2
-ENV LANG C
+#Configuraciones
+ADD vhost.conf /etc/nginx/sites-enabled/default
+ADD php.ini /etc/php5/fpm/php.ini
+ADD php.ini /etc/php5/cli/php.ini
+ADD my.cnf /etc/mysql/my.cnf
 
-
-#ADD vhost.conf /etc/nginx/sites-enabled/default
-#ADD php.ini /etc/php5/fpm/php.ini
-#ADD php.ini /etc/php5/cli/php.ini
-#ADD my.cnf /etc/mysql/my.cnf
-
+#Agrega carpetas de configuraciones
 ADD services/ /srv/services
+ADD scripts /scripts
+
+#Configurar MariaDB
+RUN chmod +x /scripts/start.sh
+#Se crea para saber cuando corre por primera vez
+RUN touch /firstrun
+
+VOLUME ["/var/log/nginx/"]
 
 ADD entrypoint.sh /usr/local/bin/entrypoint.sh
 
+#Exponemos el puerto 80 para la web
 EXPOSE 80
 
+#script que se ejecuta cada vez que se crea la vm
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
